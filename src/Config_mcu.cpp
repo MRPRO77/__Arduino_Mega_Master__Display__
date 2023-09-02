@@ -8,10 +8,13 @@
  // ========================================================================================================
 // --- Bibliotecas Auxiliares --- //
 
+
 #include <Adafruit_GFX.h>
 #include <Adafruit_BusIO_Register.h>
 #include <TCA9548A.h>
-
+#include <LiquidCrystal_I2C.h>
+#include <Adafruit_SSD1306.h>
+#include <U8glib-HAL.h>
 
 
 /**********************************************************************************************************/
@@ -48,8 +51,8 @@ unsigned long debounceDelay = 2;
 
 #define slaveAdress     0x07                   // ESP32
 
-#define i2clcd       0
-#define i2cOled      1
+#define i2clcd       0                         // Display Lcd
+#define i2cOled      1                         // Display Oled
 #define i2cESP32     2
 
 
@@ -63,9 +66,15 @@ unsigned long debounceDelay = 2;
 
 
 
+#define OLED_RESET   3
+Adafruit_SSD1306 display(OLED_RESET);               // configura tela de Oled
 
+LiquidCrystal_I2C lcd(0x27,20,4);                   // set the LCD address to 0x27 for a 16 chars and 2 line display
  
-
+U8GLIB_ST7920_128X64_1X u8g( 6,  //E
+                             5,  //R/W
+                             4,  //RS
+                             7); //RST
 
 void Config_mcu()
 {
@@ -79,20 +88,92 @@ void Config_mcu()
 
                                                          usaESP32;
                                                        delay(100);
-                                           I2CMux.closeChannel(2);                                        
-                                               
+                                           I2CMux.closeChannel(2); 
 
-                               pinMode (ledpin_MEGA_ADK, OUTPUT);                // configura o pino do LED 13 como saida
-                               digitalWrite(ledpin_MEGA_ADK,LOW);  
+                                                           usalcd;
+                                                       lcd.init();
+                                                      lcd.clear(); 
+                                                  lcd.backlight();               
+                                           I2CMux.closeChannel(0);
+
+                                                           usalcd;
+                                                      lcd.clear(); 
+                                               lcd.setCursor(2,1);
+                                    lcd.print("MRPRO TECNOLOGIA");
+                                                       delay(200);
+                                           I2CMux.closeChannel(0);                                           
+
+                        display.begin(SSD1306_SWITCHCAPVCC, 0x3C);               // initialize with the I2C addr 0x3C (for the 128x64)
+                                                      delay(3000);
+                                           display.clearDisplay();
+
+                                                          usaOled;
+                        display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+                                           display.clearDisplay();
+                                           I2CMux.closeChannel(1);          
+ 
+                                                          usaOled;
+                                           display.clearDisplay(); 
+                                      display.setTextColor(WHITE);
+                                          display.setCursor(25,1);
+                                 display.println("Loja Saravati");
+                                      display.setTextColor(WHITE);
+                                         display.setCursor(25,15);
+                                 display.println("Mestre Felipe");
+                                                      delay(2000);
+                                                display.display();
+                                           I2CMux.closeChannel(1);
+                                      
+                                                           draw();                //função para desenho de string
+                                                disp_graph_init();                //função de inicialização do display                                              
+
+                                pinMode (ledpin_MEGA_ADK, OUTPUT);                // configura o pino do LED 13 como saida
+                                digitalWrite(ledpin_MEGA_ADK,LOW);  
 
 
   // configura o pino do botao como entrada com resistor de pullup interno
-                                pinMode(buttonPin, INPUT_PULLUP);                             
+                                 pinMode(buttonPin, INPUT_PULLUP);                             
 
 }
 
 
+// ======================================================================================================
+// --- Função para desenho de strings ---
+void draw() 
+{
+  
+  u8g.setFont(u8g_font_unifont);
+ 
+  u8g.drawStr( 0, 25, "MRPRO TECNOLOGIA");
+  
+} //end draw
 
+
+// ======================================================================================================
+// --- Função de inicialização do Display ---
+void disp_graph_init()
+{
+  if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
+    u8g.setColorIndex(255);     //branco
+  }
+  else if ( u8g.getMode() == U8G_MODE_GRAY2BIT ) {
+    u8g.setColorIndex(3);         //máxima intensidade
+  }
+  else if ( u8g.getMode() == U8G_MODE_BW ) {
+    u8g.setColorIndex(1);         // pixel on
+  }
+  else if ( u8g.getMode() == U8G_MODE_HICOLOR ) {
+    u8g.setHiColorByRGB(255,255,255);
+  }
+
+    u8g.firstPage();  
+  do {
+                        draw();
+     } while( u8g.nextPage() );
+  
+                    delay(100);
+
+} //end disp_graph_init
 
 
 // ======================================================================================================

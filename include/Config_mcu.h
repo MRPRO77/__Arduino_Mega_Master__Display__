@@ -18,4 +18,7 @@ void       Config_mcu ();
 void Supervisionamento(); 
 void       comunicacao();
 
+void draw();                        //função para desenho de string
+void disp_graph_init();             //função de inicialização do display
+
 #endif
