@@ -36,12 +36,14 @@
 ________________[_]_[_]_[_]_________/_]_[_\___________________________________
                                                                              
 ============================================================================== */
+// https://capsistema.com.br/index.php/2020/11/27/como-usar-i2c-no-arduino-comunicacao-entre-duas-placas-arduino/
 
 /******************************************************************************/
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
 #include "Wire.h"
+
 
 #include "Config_mcu.h"
 
@@ -57,12 +59,10 @@ void setup() {
 void loop() {
 
 
+    Comunicacao_Oled();
 
+         comunicacao();
 
- 
-       comunicacao();
- Supervisionamento(); 
-
-
-
+   Supervisionamento(); 
+   
 }
